@@ -1,8 +1,3 @@
-// --- 1. Date ---
-function updateDate() {
-  const now = new Date();
-  document.getElementById('date').textContent = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-}
 updateDate();
 
 // --- 2. Breathing Circle (4-7-8 method) ---
@@ -36,84 +31,69 @@ circle.addEventListener('click', () => {
   }
 });
 
-// --- 3. Meditation Timer ---
-const timerDisplay = document.getElementById('timer-display');
-const timerRing = document.getElementById('timer-ring');
-const startBtn = document.getElementById('timer-start');
-const resetBtn = document.getElementById('timer-reset');
+// --- 3. REAL NATURE SOUND (Web Audio + audio file) ---
+const ambientBtn = document.getElementById('ambient-toggle');
+let audioCtx = null;
+let source = null;
+let gainNode = null;
+let isPlaying = false;
 
-const CIRCUMFERENCE = 339.292;
-let timerState = {
-  totalSeconds: 25 * 60,
-  remainingSeconds: 25 * 60,
-  isRunning: false,
-  intervalId: null,
-  startTime: null,
-  elapsedBeforePause: 0
-};
+// Replace this URL with your own nature sound MP3/OGG
+const NATURE_SOUND_URL = 'https://cdn.freesound.org/previews/123/123456_1234567-lq.mp3';
 
-function updateTimerUI() {
-  const mins = Math.floor(timerState.remainingSeconds / 60);
-  const secs = timerState.remainingSeconds % 60;
-  timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-  
-  const progress = timerState.remainingSeconds / timerState.totalSeconds;
-  const offset = CIRCUMFERENCE * (1 - progress);
-  timerRing.style.strokeDashoffset = offset;
+async function loadNatureSound(url) {
+  const response = await fetch(url);
+  const arrayBuffer = await response.arrayBuffer();
+  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+  return await audioCtx.decodeAudioData(arrayBuffer);
 }
 
-function tick() {
-  if (!timerState.isRunning) return;
-  
-  const now = Date.now();
-  const elapsed = (now - timerState.startTime) / 1000 + timerState.elapsedBeforePause;
-  const newRemaining = Math.max(0, timerState.totalSeconds - elapsed);
-  timerState.remainingSeconds = newRemaining;
-  updateTimerUI();
-  
-  if (newRemaining <= 0) {
-    timerState.isRunning = false;
-    clearInterval(timerState.intervalId);
-    startBtn.textContent = '▶ Start';
-    startBtn.classList.remove('active');
-    timerRing.style.strokeDashoffset = CIRCUMFERENCE;
-  }
-}
-
-function startTimer() {
-  if (timerState.isRunning) {
-    timerState.isRunning = false;
-    clearInterval(timerState.intervalId);
-    timerState.elapsedBeforePause = timerState.totalSeconds - timerState.remainingSeconds;
-    startBtn.textContent = '▶ Resume';
-    startBtn.classList.remove('active');
+async function toggleNature() {
+  if (isPlaying) {
+    // Fade out and stop
+    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+    setTimeout(() => {
+      if (source) {
+        source.stop();
+        source = null;
+      }
+      isPlaying = false;
+      ambientBtn.textContent = '🌿 Play Rain';
+      ambientBtn.classList.remove('active');
+    }, 500);
     return;
   }
-  
-  if (timerState.remainingSeconds <= 0) {
-    timerState.remainingSeconds = timerState.totalSeconds;
-    timerState.elapsedBeforePause = 0;
-    updateTimerUI();
+
+  // Start / resume
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   }
-  
-  timerState.isRunning = true;
-  timerState.startTime = Date.now();
-  timerState.intervalId = setInterval(tick, 100);
-  startBtn.textContent = '⏸ Pause';
-  startBtn.classList.add('active');
+
+  try {
+    const buffer = await loadNatureSound(NATURE_SOUND_URL);
+    source = audioCtx.createBufferSource();
+    source.buffer = buffer;
+    source.loop = true;
+
+    gainNode = audioCtx.createGain();
+    gainNode.gain.value = 0.4;
+
+    source.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+
+    source.start(0);
+    // Fade in
+    gainNode.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + 1);
+
+    isPlaying = true;
+    ambientBtn.textContent = '🔇 Mute Rain';
+    ambientBtn.classList.add('active');
+  } catch (e) {
+    ambientBtn.textContent = '⚠️ Audio unavailable';
+    setTimeout(() => {
+      ambientBtn.textContent = '🌿 Play Rain';
+    }, 2000);
+  }
 }
 
-function resetTimer() {
-  timerState.isRunning = false;
-  clearInterval(timerState.intervalId);
-  timerState.remainingSeconds = timerState.totalSeconds;
-  timerState.elapsedBeforePause = 0;
-  startBtn.textContent = '▶ Start';
-  startBtn.classList.remove('active');
-  timerRing.style.strokeDashoffset = 0;
-  updateTimerUI();
-}
-
-startBtn.addEventListener('click', startTimer);
-resetBtn.addEventListener('click', resetTimer);
-updateTimerUI();
+ambientBtn.addEventListener('click', toggleNature);
