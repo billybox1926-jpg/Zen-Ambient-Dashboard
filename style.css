@@ -27,113 +27,35 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2rem;
+  gap: 1.1rem;
   padding: 2rem;
   z-index: 10;
   backdrop-filter: blur(2px);
 }
 
-#clock {
-  font-size: 5rem;
-  font-weight: 300;
-  letter-spacing: 0.1em;
-  color: #fffffe;
-  text-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
-}
-
 #date {
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   font-weight: 300;
   color: #a7a9be;
-  margin-top: -1rem;
+  margin-bottom: 0.2rem;
   letter-spacing: 0.1em;
 }
 
-/* --- New Weather Glance --- */
+/* Weather */
 #weather {
-  font-size: 0.95rem;
+  font-size: 1rem;
   font-weight: 300;
   color: #a7a9be;
   letter-spacing: 0.05em;
-  opacity: 0.8;
-  margin-top: -0.5rem;
+  opacity: 0.9;
+  margin-bottom: 0.2rem;
   min-height: 1.5rem;
 }
 
-/* --- Pomodoro Timer --- */
-.timer-container {
-  position: relative;
-  width: 120px;
-  height: 120px;
-  margin: 0.5rem 0;
-}
-
-.timer-ring {
-  transform: rotate(-90deg);
-}
-
-.timer-ring-bg {
-  fill: none;
-  stroke: rgba(255, 255, 255, 0.08);
-  stroke-width: 6;
-}
-
-.timer-ring-progress {
-  fill: none;
-  stroke: #ff8906;
-  stroke-width: 6;
-  stroke-linecap: round;
-  transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
-}
-
-.timer-display {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  font-size: 1.6rem;
-  font-weight: 300;
-  letter-spacing: 0.05em;
-  color: #fffffe;
-  text-shadow: 0 0 30px rgba(255, 137, 6, 0.1);
-}
-
-.timer-controls {
-  display: flex;
-  gap: 1.2rem;
-  margin-top: -0.2rem;
-}
-
-.timer-btn {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  color: #a7a9be;
-  padding: 0.4rem 1.2rem;
-  border-radius: 30px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  letter-spacing: 0.05em;
-  font-family: inherit;
-  min-width: 60px;
-}
-
-.timer-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  border-color: rgba(255, 255, 255, 0.25);
-  color: #fffffe;
-}
-
-.timer-btn.active {
-  background: rgba(255, 137, 6, 0.15);
-  border-color: #ff8906;
-  color: #ff8906;
-}
-
-/* Breathing Circle - now with a subtle glow pulse */
+/* Breathing Circle */
 .circle {
-  width: 150px;
-  height: 150px;
+  width: 160px;
+  height: 160px;
   border-radius: 50%;
   background: radial-gradient(circle at 30% 30%, #ff8906, #e53170);
   display: flex;
@@ -141,8 +63,8 @@ body {
   align-items: center;
   cursor: pointer;
   transition: transform 4s ease-in-out, box-shadow 2s ease-in-out;
-  box-shadow: 0 0 80px rgba(229, 49, 112, 0.3);
-  margin: 1rem 0;
+  box-shadow: 0 0 90px rgba(229, 49, 112, 0.35);
+  margin: 0.5rem 0;
 }
 
 .circle.inhale { 
@@ -163,36 +85,71 @@ body {
   text-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
-/* Ambient Toggle - now with a subtle active state */
-#ambient-toggle {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
-  color: #fffffe;
-  padding: 0.8rem 2.5rem;
-  border-radius: 40px;
-  font-size: 1rem;
-  cursor: pointer;
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
-  letter-spacing: 0.05em;
-  margin-top: 0.5rem;
-}
-#ambient-toggle:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-#ambient-toggle.active {
-  background: rgba(255, 137, 6, 0.2);
-  border-color: #ff8906;
-  box-shadow: 0 0 30px rgba(255, 137, 6, 0.2);
+/* Timer Circle */
+.timer-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0.2rem 0;
 }
 
-#quote {
-  font-size: 1rem;
+.timer-ring {
+  transform: rotate(-90deg);
+}
+
+.timer-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 3;
+}
+
+.timer-ring-progress {
+  fill: none;
+  stroke: #ff8906;
+  stroke-width: 3;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+}
+
+.timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: #fffffe;
+}
+
+.timer-controls {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: 0.3rem;
+}
+
+.timer-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   color: #a7a9be;
-  font-style: italic;
-  max-width: 400px;
-  opacity: 0.8;
-  min-height: 2rem;
-  transition: opacity 0.5s ease;
+  padding: 0.45rem 1.3rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+  font-family: inherit;
+  min-width: 64px;
+}
+
+.timer-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fffffe;
+}
+
+.timer-btn.active {
+  background: rgba(255, 137, 6, 0.15);
+  border-color: #ff8906;
+  color: #ff8906;
 }
