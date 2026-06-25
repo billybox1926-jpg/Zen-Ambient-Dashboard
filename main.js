@@ -7,6 +7,51 @@ function updateClock() {
 updateClock();
 setInterval(updateClock, 1000);
 
+// --- 1.5 Weather Glance (Added) ---
+function getWeather() {
+  const weatherEl = document.getElementById('weather');
+  
+  // Try to get the user's location for hyper-local weather
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(async (pos) => {
+      try {
+        const { latitude, longitude } = pos.coords;
+        const res = await fetch(
+          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
+        );
+        const data = await res.json();
+        const temp = Math.round(data.current_weather.temperature);
+        const code = data.current_weather.weathercode;
+        
+        // Map WMO codes to simple emojis
+        const emojiMap = {
+          0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 
+          45: '🌫️', 48: '🌫️',
+          51: '🌧️', 53: '🌧️', 55: '🌧️',
+          61: '🌧️', 63: '🌧️', 65: '🌧️',
+          71: '❄️', 73: '❄️', 75: '❄️',
+          80: '🌦️', 81: '🌦️', 82: '⛈️'
+        };
+        const emoji = emojiMap[code] || '🌤️';
+        weatherEl.textContent = `${emoji} ${temp}°C`;
+      } catch (e) {
+        weatherEl.textContent = '🌤️ --°C';
+      }
+    }, 
+    // Fallback if user denies location (defaults to approximate based on timezone/IP won't work, so just show generic)
+    () => {
+      // Fallback to a generic "calm" state
+      weatherEl.textContent = '🌤️ --°C';
+    });
+  } else {
+    weatherEl.textContent = '🌤️ --°C';
+  }
+}
+// Call it once on load
+getWeather();
+// Refresh weather every 10 minutes (600,000 ms) to keep it accurate
+setInterval(getWeather, 600000);
+
 // --- 2. Breathing Circle (4-7-8 method) ---
 const circle = document.getElementById('breath-circle');
 const breathText = document.getElementById('breath-text');

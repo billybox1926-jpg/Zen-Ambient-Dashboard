@@ -49,6 +49,17 @@ body {
   letter-spacing: 0.1em;
 }
 
+/* --- New Weather Glance --- */
+#weather {
+  font-size: 0.95rem;
+  font-weight: 300;
+  color: #a7a9be;
+  letter-spacing: 0.05em;
+  opacity: 0.8;
+  margin-top: -0.5rem;
+  min-height: 1.5rem;
+}
+
 /* Breathing Circle - now with a subtle glow pulse */
 .circle {
   width: 150px;
