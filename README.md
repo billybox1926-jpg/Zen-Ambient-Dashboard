@@ -1,5 +1,10 @@
 # 🍃 Zen Ambient Dashboard
 
+[![Vite](https://img.shields.io/badge-vite-6.0-646CFF.svg?logo=vite&logoColor=white)](https://vitejs.dev/)
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+[![Netlify Status](https://api.netlify.com/api/v1/badges/deploy-status.svg)](https://app.netlify.com/projects/zen-ambient-dashboard)
+[![Size](https://img.shields.io/badge/build%20size-5%20KB-blue.svg)](https://github.com/billybox1926-jpg/Zen-Ambient-Dashboard)
+
 > *A serene, browser-based sanctuary designed to bring a moment of calm to your day. Pull it up, breathe, and reset.*
 
 ![Zen Ambient Dashboard](./screenshot.png)
