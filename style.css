@@ -1,0 +1,86 @@
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  background: #0f0e17;
+  color: #fffffe;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  padding: 2rem;
+}
+
+#clock {
+  font-size: 5rem;
+  font-weight: 300;
+  letter-spacing: 0.1em;
+  color: #fffffe;
+  text-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+}
+
+#date {
+  font-size: 1.2rem;
+  font-weight: 300;
+  color: #a7a9be;
+  margin-top: -1rem;
+}
+
+/* Breathing Circle */
+.circle {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #ff8906, #e53170);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: transform 4s ease-in-out;
+  box-shadow: 0 0 80px rgba(229, 49, 112, 0.3);
+  margin: 1rem 0;
+}
+
+.circle.inhale { transform: scale(1.4); }
+.circle.exhale { transform: scale(0.8); }
+
+#breath-text {
+  font-size: 1.2rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: #fffffe;
+  font-weight: 500;
+}
+
+#ambient-toggle {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #fffffe;
+  padding: 0.8rem 2rem;
+  border-radius: 40px;
+  font-size: 1rem;
+  cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: 0.3s;
+  margin-top: 0.5rem;
+}
+#ambient-toggle:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+#quote {
+  font-size: 1rem;
+  color: #a7a9be;
+  font-style: italic;
+  max-width: 400px;
+  opacity: 0.7;
+}
