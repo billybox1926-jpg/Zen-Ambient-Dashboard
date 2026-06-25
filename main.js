@@ -52,7 +52,108 @@ getWeather();
 // Refresh weather every 10 minutes (600,000 ms) to keep it accurate
 setInterval(getWeather, 600000);
 
-// --- 2. Breathing Circle (4-7-8 method) ---
+// --- 2. POMODORO TIMER ---
+const timerDisplay = document.getElementById('timer-display');
+const timerRing = document.getElementById('timer-ring');
+const startBtn = document.getElementById('timer-start');
+const resetBtn = document.getElementById('timer-reset');
+
+const CIRCUMFERENCE = 339.292; // 2 * PI * 54
+let timerState = {
+  totalSeconds: 25 * 60,    // 25 minutes
+  remainingSeconds: 25 * 60,
+  isRunning: false,
+  intervalId: null,
+  startTime: null,
+  elapsedBeforePause: 0
+};
+
+function updateTimerUI() {
+  const mins = Math.floor(timerState.remainingSeconds / 60);
+  const secs = timerState.remainingSeconds % 60;
+  timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+  
+  const progress = timerState.remainingSeconds / timerState.totalSeconds;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  timerRing.style.strokeDashoffset = offset;
+  
+  // Color shifts as time runs out (warm -> orange -> red)
+  if (progress > 0.5) {
+    timerRing.style.stroke = '#ff8906'; // warm orange
+  } else if (progress > 0.2) {
+    timerRing.style.stroke = '#e53170'; // pink
+  } else {
+    timerRing.style.stroke = '#ff6b6b'; // soft red
+  }
+}
+
+function tick() {
+  if (!timerState.isRunning) return;
+  
+  const now = Date.now();
+  const elapsed = (now - timerState.startTime) / 1000 + timerState.elapsedBeforePause;
+  const newRemaining = Math.max(0, timerState.totalSeconds - elapsed);
+  timerState.remainingSeconds = newRemaining;
+  updateTimerUI();
+  
+  if (newRemaining <= 0) {
+    // Timer finished
+    timerState.isRunning = false;
+    clearInterval(timerState.intervalId);
+    startBtn.textContent = '▶ Start';
+    startBtn.classList.remove('active');
+    timerRing.style.stroke = '#ff8906';
+    // Gentle visual pulse (optional)
+    timerDisplay.style.transform = 'scale(1.1)';
+    setTimeout(() => timerDisplay.style.transform = 'scale(1)', 300);
+  }
+}
+
+function startTimer() {
+  if (timerState.isRunning) {
+    // Pause
+    timerState.isRunning = false;
+    clearInterval(timerState.intervalId);
+    timerState.elapsedBeforePause = timerState.totalSeconds - timerState.remainingSeconds;
+    startBtn.textContent = '▶ Resume';
+    startBtn.classList.remove('active');
+    return;
+  }
+  
+  // Resume or fresh start
+  if (timerState.remainingSeconds <= 0) {
+    // Reset to full if finished
+    timerState.remainingSeconds = timerState.totalSeconds;
+    timerState.elapsedBeforePause = 0;
+    updateTimerUI();
+  }
+  
+  timerState.isRunning = true;
+  timerState.startTime = Date.now();
+  timerState.intervalId = setInterval(tick, 100);
+  startBtn.textContent = '⏸ Pause';
+  startBtn.classList.add('active');
+}
+
+function resetTimer() {
+  timerState.isRunning = false;
+  clearInterval(timerState.intervalId);
+  timerState.remainingSeconds = timerState.totalSeconds;
+  timerState.elapsedBeforePause = 0;
+  startBtn.textContent = '▶ Start';
+  startBtn.classList.remove('active');
+  timerRing.style.stroke = '#ff8906';
+  updateTimerUI();
+}
+
+startBtn.addEventListener('click', startTimer);
+resetBtn.addEventListener('click', resetTimer);
+
+// Initialize the ring on load
+updateTimerUI();
+// --- END POMODORO ---
+
+// --- 3. REAL AMBIENT AUDIO (Web Audio API - Pink/Brown Noise Rain) ---
 const circle = document.getElementById('breath-circle');
 const breathText = document.getElementById('breath-text');
 

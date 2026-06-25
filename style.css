@@ -60,6 +60,76 @@ body {
   min-height: 1.5rem;
 }
 
+/* --- Pomodoro Timer --- */
+.timer-container {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  margin: 0.5rem 0;
+}
+
+.timer-ring {
+  transform: rotate(-90deg);
+}
+
+.timer-ring-bg {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 6;
+}
+
+.timer-ring-progress {
+  fill: none;
+  stroke: #ff8906;
+  stroke-width: 6;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.5s ease, stroke 0.5s ease;
+}
+
+.timer-display {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  font-size: 1.6rem;
+  font-weight: 300;
+  letter-spacing: 0.05em;
+  color: #fffffe;
+  text-shadow: 0 0 30px rgba(255, 137, 6, 0.1);
+}
+
+.timer-controls {
+  display: flex;
+  gap: 1.2rem;
+  margin-top: -0.2rem;
+}
+
+.timer-btn {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: #a7a9be;
+  padding: 0.4rem 1.2rem;
+  border-radius: 30px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
+  font-family: inherit;
+  min-width: 60px;
+}
+
+.timer-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  border-color: rgba(255, 255, 255, 0.25);
+  color: #fffffe;
+}
+
+.timer-btn.active {
+  background: rgba(255, 137, 6, 0.15);
+  border-color: #ff8906;
+  color: #ff8906;
+}
+
 /* Breathing Circle - now with a subtle glow pulse */
 .circle {
   width: 150px;
