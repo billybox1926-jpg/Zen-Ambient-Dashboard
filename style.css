@@ -1,7 +1,11 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  background: #0f0e17;
+  /* Shifting gradient background - the "Ambient" visual */
+  background: linear-gradient(-45deg, #0f0e17, #1a1a2e, #16213e, #0f3460);
+  background-size: 400% 400%;
+  animation: gradientShift 20s ease-in-out infinite alternate;
+  
   color: #fffffe;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   height: 100vh;
@@ -10,6 +14,13 @@ body {
   align-items: center;
   text-align: center;
   overflow: hidden;
+  transition: background 0.5s ease;
+}
+
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
 .container {
@@ -18,6 +29,8 @@ body {
   align-items: center;
   gap: 2rem;
   padding: 2rem;
+  z-index: 10;
+  backdrop-filter: blur(2px);
 }
 
 #clock {
@@ -25,7 +38,7 @@ body {
   font-weight: 300;
   letter-spacing: 0.1em;
   color: #fffffe;
-  text-shadow: 0 0 40px rgba(255, 255, 255, 0.05);
+  text-shadow: 0 0 60px rgba(255, 255, 255, 0.1);
 }
 
 #date {
@@ -33,9 +46,10 @@ body {
   font-weight: 300;
   color: #a7a9be;
   margin-top: -1rem;
+  letter-spacing: 0.1em;
 }
 
-/* Breathing Circle */
+/* Breathing Circle - now with a subtle glow pulse */
 .circle {
   width: 150px;
   height: 150px;
@@ -45,13 +59,19 @@ body {
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  transition: transform 4s ease-in-out;
+  transition: transform 4s ease-in-out, box-shadow 2s ease-in-out;
   box-shadow: 0 0 80px rgba(229, 49, 112, 0.3);
   margin: 1rem 0;
 }
 
-.circle.inhale { transform: scale(1.4); }
-.circle.exhale { transform: scale(0.8); }
+.circle.inhale { 
+  transform: scale(1.5); 
+  box-shadow: 0 0 120px rgba(255, 137, 6, 0.5);
+}
+.circle.exhale { 
+  transform: scale(0.7); 
+  box-shadow: 0 0 40px rgba(229, 49, 112, 0.2);
+}
 
 #breath-text {
   font-size: 1.2rem;
@@ -59,22 +79,31 @@ body {
   letter-spacing: 0.2em;
   color: #fffffe;
   font-weight: 500;
+  text-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
+/* Ambient Toggle - now with a subtle active state */
 #ambient-toggle {
   background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   color: #fffffe;
-  padding: 0.8rem 2rem;
+  padding: 0.8rem 2.5rem;
   border-radius: 40px;
   font-size: 1rem;
   cursor: pointer;
   backdrop-filter: blur(10px);
-  transition: 0.3s;
+  transition: all 0.3s ease;
+  letter-spacing: 0.05em;
   margin-top: 0.5rem;
 }
 #ambient-toggle:hover {
   background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+#ambient-toggle.active {
+  background: rgba(255, 137, 6, 0.2);
+  border-color: #ff8906;
+  box-shadow: 0 0 30px rgba(255, 137, 6, 0.2);
 }
 
 #quote {
@@ -82,5 +111,7 @@ body {
   color: #a7a9be;
   font-style: italic;
   max-width: 400px;
-  opacity: 0.7;
+  opacity: 0.8;
+  min-height: 2rem;
+  transition: opacity 0.5s ease;
 }
