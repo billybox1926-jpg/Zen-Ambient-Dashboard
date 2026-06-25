@@ -1,7 +1,6 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-  /* Shifting gradient background - the "Ambient" visual */
   background: linear-gradient(-45deg, #0f0e17, #1a1a2e, #16213e, #0f3460);
   background-size: 400% 400%;
   animation: gradientShift 20s ease-in-out infinite alternate;
@@ -18,8 +17,8 @@ body {
 }
 
 @keyframes gradientShift {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
 }
 
@@ -31,6 +30,7 @@ body {
   padding: 2rem;
   z-index: 10;
   backdrop-filter: blur(2px);
+  -webkit-backdrop-filter: blur(2px);
 }
 
 #date {
@@ -52,18 +52,12 @@ body {
   align-items: center;
   cursor: pointer;
   transition: transform 4s ease-in-out, box-shadow 2s ease-in-out;
-  box-shadow: 0 0 90px rgba(229, 49, 112, 0.35);
+  box-shadow: 0 0 90px #e5317059;
   margin: 0.5rem 0;
 }
 
-.circle.inhale { 
-  transform: scale(1.5); 
-  box-shadow: 0 0 120px rgba(255, 137, 6, 0.5);
-}
-.circle.exhale { 
-  transform: scale(0.7); 
-  box-shadow: 0 0 40px rgba(229, 49, 112, 0.2);
-}
+.circle.inhale  { transform: scale(1.5); box-shadow: 0 0 120px #ff890680; }
+.circle.exhale  { transform: scale(0.7); box-shadow: 0 0 40px #e5317033; }
 
 #breath-text {
   font-size: 1.2rem;
@@ -74,25 +68,27 @@ body {
   text-shadow: 0 0 20px rgba(0,0,0,0.5);
 }
 
+#breath-hint {
+  font-size: 0.8rem;
+  color: #a7a9be;
+  letter-spacing: 0.05em;
+  opacity: 0.7;
+  margin-top: -0.5rem;
+}
+
 /* Ambient Toggle */
 #ambient-toggle {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.15);
   color: #fffffe;
   padding: 0.7rem 2.2rem;
   border-radius: 40px;
   font-size: 0.95rem;
   cursor: pointer;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   letter-spacing: 0.05em;
 }
-#ambient-toggle:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-}
-#ambient-toggle.active {
-  background: rgba(255, 137, 6, 0.2);
-  border-color: #ff8906;
-  box-shadow: 0 0 30px rgba(255, 137, 6, 0.2);
-}
+#ambient-toggle:hover  { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3); }
+#ambient-toggle.active { background: rgba(255,137,6,0.2); border-color: #ff8906; box-shadow: 0 0 30px rgba(255,137,6,0.2); }

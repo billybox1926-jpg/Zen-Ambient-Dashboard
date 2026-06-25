@@ -1,99 +1,100 @@
+// --- 1. Date ---
+function updateDate() {
+  const now = new Date();
+  document.getElementById('date').textContent = now.toLocaleDateString('en-US', {
+    weekday: 'long', month: 'long', day: 'numeric'
+  });
+}
 updateDate();
+setInterval(updateDate, 60_000);
 
-// --- 2. Breathing Circle (4-7-8 method) ---
-const circle = document.getElementById('breath-circle');
+// --- 2. Breathing (4-7-8 pattern) ---
+const circle   = document.getElementById('breath-circle');
 const breathText = document.getElementById('breath-text');
+const breathHint = document.getElementById('breath-hint');
 
-function sleep(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
+function delay(ms) { return new Promise(r => setTimeout(r, ms)); }
 
-async function startBreathing() {
-  while (true) {
+async function breathLoop() {
+  breathHint.textContent = '';
+  for (;;) {
     circle.classList.remove('exhale');
     circle.classList.add('inhale');
     breathText.textContent = 'Inhale';
-    await sleep(4000);
-    
+    await delay(4000);
+
     breathText.textContent = 'Hold';
-    await sleep(7000);
-    
+    await delay(7000);
+
     circle.classList.remove('inhale');
     circle.classList.add('exhale');
     breathText.textContent = 'Exhale';
-    await sleep(8000);
+    await delay(8000);
   }
 }
 
-let isBreathing = false;
+let breathStarted = false;
 circle.addEventListener('click', () => {
-  if (!isBreathing) {
-    isBreathing = true;
-    startBreathing();
-  }
+  if (!breathStarted) { breathStarted = true; breathLoop(); }
 });
 
-// --- 3. REAL NATURE SOUND (Web Audio + audio file) ---
-const ambientBtn = document.getElementById('ambient-toggle');
+// --- 3. Ambient Rain (procedural — no external URLs) ---
+const toggleBtn = document.getElementById('ambient-toggle');
 let audioCtx = null;
-let source = null;
-let gainNode = null;
-let isPlaying = false;
+let rainGain = null;
+let rainActive = false;
 
-// Replace this URL with your own nature sound MP3/OGG
-const NATURE_SOUND_URL = 'https://www.soundjay.com/nature_c2026/sounds/rain-01.mp3';
+function buildRain(ctx) {
+  // Pink-ish noise via filtering white noise
+  const bufSize = 2 * ctx.sampleRate;
+  const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
 
-async function loadNatureSound(url) {
-  const response = await fetch(url);
-  const arrayBuffer = await response.arrayBuffer();
-  audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
-  return await audioCtx.decodeAudioData(arrayBuffer);
+  const src = ctx.createBufferSource();
+  src.buffer = buf;
+  src.loop = true;
+
+  const lo = ctx.createBiquadFilter();
+  lo.type = 'lowpass';
+  lo.frequency.value = 1400;
+  lo.Q.value = 0.5;
+
+  const hi = ctx.createBiquadFilter();
+  hi.type = 'highpass';
+  hi.frequency.value = 280;
+  hi.Q.value = 0.4;
+
+  src.connect(lo);
+  lo.connect(hi);
+  return { src, out: hi };
 }
 
-async function toggleNature() {
-  if (isPlaying) {
-    // Fade out and stop
-    gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+async function toggleRain() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if (audioCtx.state === 'suspended') await audioCtx.resume();
+
+  if (rainActive) {
+    rainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
     setTimeout(() => {
-      if (source) {
-        source.stop();
-        source = null;
-      }
-      isPlaying = false;
-      ambientBtn.textContent = '🌿 Play Rain';
-      ambientBtn.classList.remove('active');
-    }, 500);
-    return;
-  }
-
-  // Start / resume
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-
-  try {
-    const buffer = await loadNatureSound(NATURE_SOUND_URL);
-    source = audioCtx.createBufferSource();
-    source.buffer = buffer;
-    source.loop = true;
-
-    gainNode = audioCtx.createGain();
-    gainNode.gain.value = 0.4;
-
-    source.connect(gainNode);
-    gainNode.connect(audioCtx.destination);
-
-    source.start(0);
-    // Fade in
-    gainNode.gain.exponentialRampToValueAtTime(0.4, audioCtx.currentTime + 1);
-
-    isPlaying = true;
-    ambientBtn.textContent = '🔇 Mute Rain';
-    ambientBtn.classList.add('active');
-  } catch (e) {
-    ambientBtn.textContent = '⚠️ Audio unavailable';
-    setTimeout(() => {
-      ambientBtn.textContent = '🌿 Play Rain';
-    }, 2000);
+      rainGain.disconnect();
+      rainGain = null;
+      rainActive = false;
+    }, 1200);
+    toggleBtn.textContent = '🌿 Play Rain';
+    toggleBtn.classList.remove('active');
+  } else {
+    const { src, out } = buildRain(audioCtx);
+    rainGain = audioCtx.createGain();
+    rainGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    rainGain.gain.setTargetAtTime(0.35, audioCtx.currentTime, 0.8);
+    out.connect(rainGain);
+    rainGain.connect(audioCtx.destination);
+    src.start(0);
+    rainActive = true;
+    toggleBtn.textContent = '🔇 Mute Rain';
+    toggleBtn.classList.add('active');
   }
 }
 
-ambientBtn.addEventListener('click', toggleNature);
+toggleBtn.addEventListener('click', toggleRain);
