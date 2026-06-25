@@ -39,7 +39,7 @@ let gainNode = null;
 let isPlaying = false;
 
 // Replace this URL with your own nature sound MP3/OGG
-const NATURE_SOUND_URL = 'https://cdn.freesound.org/previews/123/123456_1234567-lq.mp3';
+const NATURE_SOUND_URL = 'https://www.soundjay.com/nature_c2026/sounds/rain-01.mp3';
 
 async function loadNatureSound(url) {
   const response = await fetch(url);
