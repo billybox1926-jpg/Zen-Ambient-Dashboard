@@ -41,17 +41,6 @@ body {
   letter-spacing: 0.1em;
 }
 
-/* Weather */
-#weather {
-  font-size: 1rem;
-  font-weight: 300;
-  color: #a7a9be;
-  letter-spacing: 0.05em;
-  opacity: 0.9;
-  margin-bottom: 0.2rem;
-  min-height: 1.5rem;
-}
-
 /* Breathing Circle */
 .circle {
   width: 160px;

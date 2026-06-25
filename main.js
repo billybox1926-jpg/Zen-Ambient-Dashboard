@@ -5,44 +5,6 @@ function updateDate() {
 }
 updateDate();
 
-// --- 1.5 Weather Glance ---
-function getWeather() {
-  const weatherEl = document.getElementById('weather');
-  
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(async (pos) => {
-      try {
-        const { latitude, longitude } = pos.coords;
-        const res = await fetch(
-          `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`
-        );
-        const data = await res.json();
-        const temp = Math.round(data.current_weather.temperature);
-        const code = data.current_weather.weathercode;
-        
-        const emojiMap = {
-          0: '☀️', 1: '🌤️', 2: '⛅', 3: '☁️', 
-          45: '🌫️', 48: '🌫️',
-          51: '🌧️', 53: '🌧️', 55: '🌧️',
-          61: '🌧️', 63: '🌧️', 65: '🌧️',
-          71: '❄️', 73: '❄️', 75: '❄️',
-          80: '🌦️', 81: '🌦️', 82: '⛈️'
-        };
-        const emoji = emojiMap[code] || '🌤️';
-        weatherEl.textContent = `${emoji} ${temp}°C`;
-      } catch (e) {
-        weatherEl.textContent = '🌤️ --°C';
-      }
-    }, () => {
-      weatherEl.textContent = '🌤️ --°C';
-    });
-  } else {
-    weatherEl.textContent = '🌤️ --°C';
-  }
-}
-getWeather();
-setInterval(getWeather, 600000);
-
 // --- 2. Breathing Circle (4-7-8 method) ---
 const circle = document.getElementById('breath-circle');
 const breathText = document.getElementById('breath-text');
