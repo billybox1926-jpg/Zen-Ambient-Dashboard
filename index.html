@@ -217,6 +217,7 @@
     <button class="btn" id="resetBtn">
       <span>↻</span> Reset
     </button>
+    <button class="btn" id="rainBtn">🌧️ Rain</button>
   </div>
 </div>
 
@@ -234,6 +235,7 @@
   const breathCircle    = document.getElementById('breathCircle');
   const circleLabel     = document.getElementById('circleLabel');
   const breathInstruction = document.getElementById('breathInstruction');
+  const rainBtn         = document.getElementById('rainBtn');
 
   // --- Date ---
   function updateDate() {
@@ -360,6 +362,79 @@
     }
     if (e.code === 'KeyR' && !e.repeat) resetTimer();
   });
+
+  // --- Ambient rain (procedural Web Audio) ---
+  let audioCtx = null;
+  let rainGain = null;
+  let rainActive = false;
+  let rainSource = null;
+  let rainNodes = null;
+
+  function buildRain(ctx) {
+    const bufSize = 2 * ctx.sampleRate;
+    const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < bufSize; i++) data[i] = Math.random() * 2 - 1;
+
+    const src = ctx.createBufferSource();
+    src.buffer = buf;
+    src.loop = true;
+
+    const lo = ctx.createBiquadFilter();
+    lo.type = 'lowpass';
+    lo.frequency.value = 1400;
+    lo.Q.value = 0.5;
+
+    const hi = ctx.createBiquadFilter();
+    hi.type = 'highpass';
+    hi.frequency.value = 280;
+    hi.Q.value = 0.4;
+
+    src.connect(lo);
+    lo.connect(hi);
+    return { src, out: hi };
+  }
+
+  async function toggleRain() {
+    if (!audioCtx) {
+      audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (audioCtx.state === 'suspended') {
+      await audioCtx.resume();
+    }
+
+    if (rainActive) {
+      if (rainGain) {
+        rainGain.gain.setTargetAtTime(0, audioCtx.currentTime, 0.4);
+      }
+      const stopLater = () => {
+        try { rainSource && rainSource.stop(); } catch (_) {}
+        rainSource = null;
+        rainNodes = null;
+      };
+      setTimeout(stopLater, 1200);
+      rainActive = false;
+      rainBtn.textContent = '🌧️ Rain';
+      rainBtn.classList.remove('active');
+      return;
+    }
+
+    const { src, out } = buildRain(audioCtx);
+    rainGain = audioCtx.createGain();
+    rainGain.gain.setValueAtTime(0, audioCtx.currentTime);
+    rainGain.gain.setTargetAtTime(0.35, audioCtx.currentTime, 0.8);
+    out.connect(rainGain);
+    rainGain.connect(audioCtx.destination);
+    src.start(0);
+
+    rainSource = src;
+    rainNodes = { src, out, rainGain };
+    rainActive = true;
+    rainBtn.textContent = '🔇 Mute';
+    rainBtn.classList.add('active');
+  }
+
+  rainBtn.addEventListener('click', toggleRain);
 
   // Init
   resetTimer();
