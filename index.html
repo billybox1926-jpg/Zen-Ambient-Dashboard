@@ -1,27 +1,374 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zen Ambient</title>
-    <script type="module" crossorigin src="/assets/index-B5_iTv2I.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CqHV0ZSu.css">
-  </head>
-  <body>
-    <div id="app">
-      <div class="container">
-        <!-- Date -->
-        <div id="date"></div>
-        
-        <!-- Breathing Circle -->
-        <div id="breath-circle" class="circle">
-          <span id="breath-text">Breathe</span>
-        </div>
-        <div id="breath-hint">tap to begin</div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Zen Ambient Dashboard</title>
+  <style>
+    /* Reset & base */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-        <!-- Ambient Toggle -->
-        <button id="ambient-toggle">🌿 Play Rain</button>
-      </div>
+    body {
+      min-height: 100vh;
+      background: radial-gradient(ellipse at 30% 30%, #1a2340, #0b0f1a);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: #f0f4fc;
+      user-select: none;
+    }
+
+    .dashboard {
+      text-align: center;
+      width: 100%;
+      max-width: 480px;
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* --- Top: date + weather --- */
+    .top-bar {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2.5rem;
+      font-weight: 300;
+      letter-spacing: 0.5px;
+    }
+
+    .date {
+      font-size: 1.1rem;
+      color: #d0d8ec;
+    }
+
+    .weather {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 1rem;
+      color: #b0bcd6;
+    }
+
+    .weather-icon {
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    /* --- Main breathing circle --- */
+    .breath-circle {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 35% 35%, #ff8c4a, #e0452e);
+      box-shadow: 0 0 60px rgba(230, 70, 50, 0.35), 0 0 120px rgba(230, 70, 50, 0.15);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+      margin-bottom: 2rem;
+    }
+
+    .breath-circle:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 80px rgba(230, 70, 50, 0.45), 0 0 160px rgba(230, 70, 50, 0.2);
+    }
+
+    .breath-circle:active {
+      transform: scale(0.97);
+    }
+
+    .breath-circle span {
+      font-size: 1.3rem;
+      font-weight: 500;
+      letter-spacing: 4px;
+      color: #fff;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+    }
+
+    /* --- Timer ring --- */
+    .timer-wrapper {
+      position: relative;
+      width: 160px;
+      height: 160px;
+      margin-bottom: 2.5rem;
+    }
+
+    .timer-svg {
+      transform: rotate(-90deg);
+      width: 100%;
+      height: 100%;
+    }
+
+    .timer-bg {
+      fill: none;
+      stroke: rgba(255, 255, 255, 0.08);
+      stroke-width: 4;
+    }
+
+    .timer-progress {
+      fill: none;
+      stroke: #e86a4a;
+      stroke-width: 4;
+      stroke-linecap: round;
+      stroke-dasharray: 452.389; /* 2 * pi * 72 */
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 0.3s ease;
+    }
+
+    .timer-text {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2.2rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      color: #f0f4fc;
+    }
+
+    .timer-text span {
+      opacity: 0.9;
+    }
+
+    /* --- Bottom buttons --- */
+    .actions {
+      display: flex;
+      gap: 1rem;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .btn {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 40px;
+      padding: 0.6rem 1.6rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: #d0d8ec;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      letter-spacing: 0.5px;
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.15);
+      transform: translateY(-1px);
+    }
+
+    .btn:active {
+      transform: translateY(1px);
+    }
+
+    .btn-icon {
+      font-size: 1.1rem;
+      line-height: 1;
+    }
+
+    /* Responsive */
+    @media (max-width: 480px) {
+      .breath-circle {
+        width: 150px;
+        height: 150px;
+      }
+      .breath-circle span {
+        font-size: 1.1rem;
+      }
+      .timer-wrapper {
+        width: 140px;
+        height: 140px;
+      }
+      .timer-text {
+        font-size: 1.8rem;
+      }
+      .top-bar {
+        font-size: 0.9rem;
+      }
+      .btn {
+        padding: 0.5rem 1.2rem;
+        font-size: 0.8rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="dashboard">
+  <!-- Top Bar -->
+  <div class="top-bar">
+    <div class="date" id="dateDisplay">—</div>
+    <div class="weather">
+      <span class="weather-icon">⛅</span>
+      <span id="tempDisplay">--°C</span>
     </div>
-  </body>
+  </div>
+
+  <!-- Breathing Circle -->
+  <div class="breath-circle" id="breathCircle">
+    <span>BREATHE</span>
+  </div>
+
+  <!-- Timer Ring -->
+  <div class="timer-wrapper">
+    <svg class="timer-svg" viewBox="0 0 160 160">
+      <circle class="timer-bg" cx="80" cy="80" r="72" />
+      <circle class="timer-progress" id="timerProgress" cx="80" cy="80" r="72" />
+    </svg>
+    <div class="timer-text">
+      <span id="timerDisplay">25:00</span>
+    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="actions">
+    <button class="btn" id="startBtn">
+      <span class="btn-icon">▶</span> Start
+    </button>
+    <button class="btn" id="resetBtn">
+      <span class="btn-icon">↻</span> Reset
+    </button>
+  </div>
+</div>
+
+<script>
+  (function() {
+    'use strict';
+
+    // --- DOM refs ---
+    const dateDisplay = document.getElementById('dateDisplay');
+    const tempDisplay = document.getElementById('tempDisplay');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const progressCircle = document.getElementById('timerProgress');
+    const startBtn = document.getElementById('startBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const breathCircle = document.getElementById('breathCircle');
+
+    // --- Date & weather (static placeholder) ---
+    function updateDate() {
+      const now = new Date();
+      const options = { weekday: 'long', month: 'long', day: 'numeric' };
+      dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+    }
+    updateDate();
+    // Weather placeholder – you can replace with real API later
+    tempDisplay.textContent = '--°C';
+
+    // --- Timer state ---
+    const TOTAL_SECONDS = 25 * 60; // 25 minutes
+    let remainingSeconds = TOTAL_SECONDS;
+    let timerInterval = null;
+    let isRunning = false;
+
+    // Circumference of circle with r=72 → 2*π*72 ≈ 452.389
+    const CIRCUMFERENCE = 2 * Math.PI * 72;
+    progressCircle.style.strokeDasharray = CIRCUMFERENCE;
+    progressCircle.style.strokeDashoffset = 0; // start full
+
+    function updateTimerDisplay(seconds) {
+      const mins = Math.floor(seconds / 60);
+      const secs = seconds % 60;
+      timerDisplay.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+      // Update progress ring
+      const fraction = seconds / TOTAL_SECONDS;
+      const offset = CIRCUMFERENCE * (1 - fraction);
+      progressCircle.style.strokeDashoffset = offset;
+    }
+
+    function resetTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+      isRunning = false;
+      remainingSeconds = TOTAL_SECONDS;
+      updateTimerDisplay(remainingSeconds);
+      startBtn.innerHTML = '<span class="btn-icon">▶</span> Start';
+      // reset progress to full (offset 0)
+      progressCircle.style.strokeDashoffset = 0;
+    }
+
+    function startTimer() {
+      if (isRunning) {
+        // Pause
+        clearInterval(timerInterval);
+        timerInterval = null;
+        isRunning = false;
+        startBtn.innerHTML = '<span class="btn-icon">▶</span> Start';
+        return;
+      }
+
+      // If already at 0, reset first
+      if (remainingSeconds <= 0) {
+        resetTimer();
+        // then start
+        remainingSeconds = TOTAL_SECONDS;
+      }
+
+      isRunning = true;
+      startBtn.innerHTML = '<span class="btn-icon">⏸</span> Pause';
+
+      timerInterval = setInterval(() => {
+        remainingSeconds--;
+        updateTimerDisplay(remainingSeconds);
+
+        if (remainingSeconds <= 0) {
+          clearInterval(timerInterval);
+          timerInterval = null;
+          isRunning = false;
+          startBtn.innerHTML = '<span class="btn-icon">▶</span> Start';
+          // Optionally play a notification sound or visual feedback
+          // For now, just reset to 0 (ring empty)
+          progressCircle.style.strokeDashoffset = CIRCUMFERENCE;
+          timerDisplay.textContent = '00:00';
+        }
+      }, 1000);
+    }
+
+    // --- Event listeners ---
+    startBtn.addEventListener('click', startTimer);
+
+    resetBtn.addEventListener('click', function() {
+      resetTimer();
+    });
+
+    // Clicking the breathing circle can also start/pause (optional)
+    // We'll make it toggle timer for consistency
+    breathCircle.addEventListener('click', startTimer);
+
+    // --- Init ---
+    resetTimer();
+
+    // --- Bonus: we could add keyboard shortcuts (Space to start/pause) ---
+    document.addEventListener('keydown', function(e) {
+      if (e.code === 'Space' && !e.repeat) {
+        e.preventDefault();
+        startTimer();
+      }
+      if (e.code === 'KeyR' && !e.repeat) {
+        resetTimer();
+      }
+    });
+
+    console.log('Zen Ambient Dashboard loaded.');
+  })();
+</script>
+</body>
 </html>
