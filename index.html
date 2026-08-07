@@ -220,15 +220,11 @@
 
   <!-- Breathing Circle -->
   <div class="breath-circle" id="breathCircle">
-    <span id="circleLabel">BREATHE</span>
+    <span>BREATHE</span>
   </div>
+  <div class="breath-label" id="breathLabel">Ready</div>
 
-  <!-- Closed-caption instruction text -->
-  <div class="breath-instruction idle" id="breathInstruction">
-    Click circle to begin guided breathing
-  </div>
-
-  <!-- Timer -->
+  <!-- Timer Ring -->
   <div class="timer-wrapper">
     <svg class="timer-svg" viewBox="0 0 160 160">
       <circle class="timer-bg" cx="80" cy="80" r="72" />
@@ -242,7 +238,7 @@
   <!-- Controls -->
   <div class="actions">
     <button class="btn" id="startBtn">
-      <span>▶</span> Start
+      <span class="btn-icon">▶</span> Start
     </button>
     <button class="btn" id="resetBtn">
       <span>↻</span> Reset
@@ -263,8 +259,7 @@
   const startBtn        = document.getElementById('startBtn');
   const resetBtn        = document.getElementById('resetBtn');
   const breathCircle    = document.getElementById('breathCircle');
-  const circleLabel     = document.getElementById('circleLabel');
-  const breathInstruction = document.getElementById('breathInstruction');
+  const breathLabel     = document.getElementById('breathLabel');
   const rainBtn         = document.getElementById('rainBtn');
 
   // --- Date ---
@@ -345,23 +340,22 @@
       // INHALE 4s
       breathCircle.classList.remove('exhale');
       breathCircle.classList.add('inhale');
-      circleLabel.textContent = 'INHALE';
-      breathInstruction.textContent = 'Inhale slowly through your nose';
-      breathInstruction.classList.remove('idle');
+      breathCircle.firstElementChild.textContent = 'INHALE';
+      breathLabel.textContent = 'Inhale slowly through your nose';
       await delay(4000);
       if (!breathActive) break;
 
       // HOLD 7s
-      circleLabel.textContent = 'HOLD';
-      breathInstruction.textContent = 'Hold your breath';
+      breathCircle.firstElementChild.textContent = 'HOLD';
+      breathLabel.textContent = 'Hold your breath';
       await delay(7000);
       if (!breathActive) break;
 
       // EXHALE 8s
       breathCircle.classList.remove('inhale');
       breathCircle.classList.add('exhale');
-      circleLabel.textContent = 'EXHALE';
-      breathInstruction.textContent = 'Exhale slowly through your mouth';
+      breathCircle.firstElementChild.textContent = 'EXHALE';
+      breathLabel.textContent = 'Exhale slowly through your mouth';
       await delay(8000);
     }
   }
@@ -370,9 +364,8 @@
     breathActive = false;
     clearTimeout(breathTimeout);
     breathCircle.classList.remove('inhale', 'exhale');
-    circleLabel.textContent = 'BREATHE';
-    breathInstruction.textContent = 'Click circle to begin guided breathing';
-    breathInstruction.classList.add('idle');
+    breathCircle.firstElementChild.textContent = 'BREATHE';
+    breathLabel.textContent = 'Ready';
   }
 
   breathCircle.addEventListener('click', () => {
