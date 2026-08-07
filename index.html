@@ -189,17 +189,20 @@
 
     .btn:active { transform: translateY(1px); }
 
-    .btn-icon {
-      font-size: 1.1rem;
-      line-height: 1;
+    .btn-rain.active {
+      border-color: #5f8a9c;
+      color: #8fcbdf;
+      box-shadow: 0 0 25px rgba(90, 180, 220, 0.1);
     }
 
     @media (max-width: 480px) {
       .breath-circle { width: 150px; height: 150px; }
+      .breath-circle.inhale { transform: scale(1.25); }
       .breath-circle span { font-size: 1.1rem; }
-      .breath-instruction { font-size: 1.35rem; }
-      .timer-wrapper { width: 130px; height: 130px; }
-      .timer-text { font-size: 1.7rem; }
+      .timer-wrapper { width: 140px; height: 140px; }
+      .timer-text { font-size: 1.8rem; }
+      .top-bar { font-size: 0.9rem; }
+      .btn { padding: 0.5rem 1.2rem; font-size: 0.8rem; }
     }
   </style>
 </head>
@@ -244,7 +247,7 @@
     <button class="btn" id="resetBtn">
       <span>↻</span> Reset
     </button>
-    <button class="btn" id="rainBtn">🌧️ Rain</button>
+    <button class="btn btn-rain" id="rainBtn">🌧️ Rain</button>
   </div>
 </div>
 
