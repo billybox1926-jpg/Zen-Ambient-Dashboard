@@ -1,27 +1,418 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Zen Ambient</title>
-    <script type="module" crossorigin src="/assets/index-B5_iTv2I.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CqHV0ZSu.css">
-  </head>
-  <body>
-    <div id="app">
-      <div class="container">
-        <!-- Date -->
-        <div id="date"></div>
-        
-        <!-- Breathing Circle -->
-        <div id="breath-circle" class="circle">
-          <span id="breath-text">Breathe</span>
-        </div>
-        <div id="breath-hint">tap to begin</div>
+    <title>Zen Ambient Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-        <!-- Ambient Toggle -->
-        <button id="ambient-toggle">🌿 Play Rain</button>
-      </div>
+        body {
+            background: #0b0d10;
+            color: #d4d4d4;
+            font-family: 'Segoe UI', 'Helvetica Neue', sans-serif;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            user-select: none;
+        }
+
+        .dashboard {
+            text-align: center;
+            width: 100%;
+            max-width: 500px;
+            padding: 2rem;
+        }
+
+        /* Date */
+        .date {
+            font-size: 1rem;
+            font-weight: 300;
+            letter-spacing: 2px;
+            color: #888;
+            margin-bottom: 3rem;
+        }
+
+        /* Breathing Circle */
+        .breath-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 3rem;
+        }
+
+        .circle-wrapper {
+            width: 240px;
+            height: 240px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+
+        .circle-wrapper:active {
+            transform: scale(0.97);
+        }
+
+        .circle {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #5f7a8c, #2a3b47);
+            box-shadow: 0 0 60px rgba(90, 150, 200, 0.2);
+            transition: width 4s ease-in-out, height 4s ease-in-out, box-shadow 4s ease-in-out;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.2rem;
+            font-weight: 300;
+            letter-spacing: 3px;
+            color: rgba(255, 255, 255, 0.9);
+            text-transform: uppercase;
+        }
+
+        /* States */
+        .circle.idle {
+            width: 100px;
+            height: 100px;
+            box-shadow: 0 0 60px rgba(90, 150, 200, 0.15);
+        }
+
+        .circle.inhale {
+            width: 200px;
+            height: 200px;
+            box-shadow: 0 0 100px rgba(100, 200, 255, 0.3);
+        }
+
+        .circle.hold {
+            width: 200px;
+            height: 200px;
+            box-shadow: 0 0 100px rgba(100, 200, 255, 0.15);
+        }
+
+        .circle.exhale {
+            width: 100px;
+            height: 100px;
+            box-shadow: 0 0 60px rgba(90, 150, 200, 0.15);
+        }
+
+        .breath-label {
+            margin-top: 1.5rem;
+            font-size: 1.4rem;
+            font-weight: 200;
+            letter-spacing: 4px;
+            color: #aaa;
+            min-height: 2.5rem;
+        }
+
+        .tap-hint {
+            margin-top: 0.5rem;
+            font-size: 0.75rem;
+            color: #555;
+            letter-spacing: 2px;
+            transition: opacity 0.5s;
+        }
+
+        /* Rain Button */
+        .rain-btn {
+            background: none;
+            border: 1px solid #333;
+            color: #ccc;
+            padding: 0.8rem 2.2rem;
+            border-radius: 40px;
+            font-size: 1rem;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .rain-btn:hover {
+            background: rgba(255, 255, 255, 0.06);
+            border-color: #555;
+        }
+
+        .rain-btn.active {
+            border-color: #5f8a9c;
+            color: #8fcbdf;
+            box-shadow: 0 0 25px rgba(90, 180, 220, 0.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .circle-wrapper {
+                width: 180px;
+                height: 180px;
+            }
+            .circle.inhale,
+            .circle.hold {
+                width: 160px;
+                height: 160px;
+            }
+            .circle.idle,
+            .circle.exhale {
+                width: 80px;
+                height: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="dashboard">
+        <!-- Date -->
+        <div class="date" id="dateDisplay">—</div>
+
+        <!-- Breathing Circle -->
+        <div class="breath-container">
+            <div class="circle-wrapper" id="circleWrapper">
+                <div class="circle idle" id="circle">Breathe</div>
+            </div>
+            <div class="breath-label" id="breathLabel">Tap to begin</div>
+            <div class="tap-hint" id="tapHint">⏎ press the circle</div>
+        </div>
+
+        <!-- Rain Toggle -->
+        <button class="rain-btn" id="rainBtn">�� Play Rain</button>
     </div>
-  </body>
+
+    <script>
+        (function() {
+            'use strict';
+
+            // --- DOM refs ---
+            const circle = document.getElementById('circle');
+            const wrapper = document.getElementById('circleWrapper');
+            const label = document.getElementById('breathLabel');
+            const hint = document.getElementById('tapHint');
+            const dateDisplay = document.getElementById('dateDisplay');
+            const rainBtn = document.getElementById('rainBtn');
+
+            // --- Date ---
+            function updateDate() {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                dateDisplay.textContent = now.toLocaleDateString('en-US', options);
+            }
+            updateDate();
+
+            // --- Breathing state ---
+            const STATES = {
+                IDLE: 'idle',
+                INHALE: 'inhale',
+                HOLD_1: 'hold',
+                EXHALE: 'exhale',
+                HOLD_2: 'hold'
+            };
+
+            let currentState = STATES.IDLE;
+            let isActive = false;
+            let timeoutId = null;
+
+            const TIMINGS = {
+                [STATES.INHALE]: 4000,
+                [STATES.HOLD_1]: 4000,
+                [STATES.EXHALE]: 4000,
+                [STATES.HOLD_2]: 4000
+            };
+
+            const LABELS = {
+                [STATES.IDLE]: 'Tap to begin',
+                [STATES.INHALE]: 'Inhale',
+                [STATES.HOLD_1]: 'Hold',
+                [STATES.EXHALE]: 'Exhale',
+                [STATES.HOLD_2]: 'Hold'
+            };
+
+            function setCircleState(state) {
+                // Remove all state classes
+                circle.classList.remove('idle', 'inhale', 'hold', 'exhale');
+                // Add the new one
+                circle.classList.add(state);
+                // Update label
+                label.textContent = LABELS[state] || '';
+                // Update hint visibility
+                if (state === STATES.IDLE) {
+                    hint.style.opacity = '1';
+                } else {
+                    hint.style.opacity = '0';
+                }
+                currentState = state;
+            }
+
+            function nextBreathState() {
+                if (!isActive) return;
+
+                switch (currentState) {
+                    case STATES.IDLE:
+                        setCircleState(STATES.INHALE);
+                        break;
+                    case STATES.INHALE:
+                        setCircleState(STATES.HOLD_1);
+                        break;
+                    case STATES.HOLD_1:
+                        setCircleState(STATES.EXHALE);
+                        break;
+                    case STATES.EXHALE:
+                        setCircleState(STATES.HOLD_2);
+                        break;
+                    case STATES.HOLD_2:
+                        setCircleState(STATES.INHALE);
+                        break;
+                    default:
+                        setCircleState(STATES.IDLE);
+                        break;
+                }
+
+                // Schedule next step
+                const duration = TIMINGS[currentState] || 4000;
+                timeoutId = setTimeout(nextBreathState, duration);
+            }
+
+            function startBreathing() {
+                if (isActive) return;
+                isActive = true;
+                // If idle, start with inhale
+                if (currentState === STATES.IDLE) {
+                    setCircleState(STATES.INHALE);
+                    timeoutId = setTimeout(nextBreathState, TIMINGS[STATES.INHALE]);
+                } else {
+                    // if it was paused somehow, just continue
+                    timeoutId = setTimeout(nextBreathState, TIMINGS[currentState] || 4000);
+                }
+            }
+
+            function stopBreathing() {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                    timeoutId = null;
+                }
+                isActive = false;
+                setCircleState(STATES.IDLE);
+            }
+
+            function toggleBreathing() {
+                if (isActive) {
+                    stopBreathing();
+                } else {
+                    startBreathing();
+                }
+            }
+
+            // Click on circle wrapper toggles breathing
+            wrapper.addEventListener('click', toggleBreathing);
+
+            // --- Rain sound (Web Audio API) ---
+            let audioContext = null;
+            let noiseBuffer = null;
+            let noiseSource = null;
+            let gainNode = null;
+            let filterNode = null;
+            let isRainPlaying = false;
+
+            function createNoiseBuffer(context, duration) {
+                const sampleRate = context.sampleRate;
+                const samples = duration * sampleRate;
+                const buffer = context.createBuffer(1, samples, sampleRate);
+                const data = buffer.getChannelData(0);
+                for (let i = 0; i < samples; i++) {
+                    data[i] = (Math.random() * 2) - 1;
+                }
+                return buffer;
+            }
+
+            function playRain() {
+                if (!audioContext) {
+                    audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                }
+
+                if (audioContext.state === 'suspended') {
+                    audioContext.resume();
+                }
+
+                // If already playing, stop it
+                if (isRainPlaying) {
+                    stopRain();
+                    return;
+                }
+
+                // Create buffer if not exists
+                if (!noiseBuffer) {
+                    noiseBuffer = createNoiseBuffer(audioContext, 5); // 5-second loop
+                }
+
+                // Nodes
+                noiseSource = audioContext.createBufferSource();
+                noiseSource.buffer = noiseBuffer;
+                noiseSource.loop = true;
+
+                gainNode = audioContext.createGain();
+                gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+
+                filterNode = audioContext.createBiquadFilter();
+                filterNode.type = 'lowpass';
+                filterNode.frequency.setValueAtTime(1200, audioContext.currentTime);
+                filterNode.Q.setValueAtTime(0.5, audioContext.currentTime);
+
+                // Connect: source -> filter -> gain -> output
+                noiseSource.connect(filterNode);
+                filterNode.connect(gainNode);
+                gainNode.connect(audioContext.destination);
+
+                noiseSource.start();
+                isRainPlaying = true;
+                rainBtn.classList.add('active');
+                rainBtn.textContent = '��️ Stop Rain';
+            }
+
+            function stopRain() {
+                if (noiseSource) {
+                    try {
+                        noiseSource.stop();
+                    } catch (_) { /* ignore */ }
+                    noiseSource.disconnect();
+                    noiseSource = null;
+                }
+                if (filterNode) {
+                    filterNode.disconnect();
+                    filterNode = null;
+                }
+                if (gainNode) {
+                    gainNode.disconnect();
+                    gainNode = null;
+                }
+                isRainPlaying = false;
+                rainBtn.classList.remove('active');
+                rainBtn.textContent = '�� Play Rain';
+            }
+
+            rainBtn.addEventListener('click', playRain);
+
+            // Clean up audio on page unload
+            window.addEventListener('beforeunload', function() {
+                if (isRainPlaying) {
+                    stopRain();
+                }
+                if (audioContext && audioContext.state !== 'closed') {
+                    audioContext.close();
+                }
+            });
+
+            // --- Initial state ---
+            setCircleState(STATES.IDLE);
+
+            // If user taps the circle, the event listener above handles it.
+            // Also, clicking the label area can toggle (optional), but we already have wrapper.
+
+            console.log('�� Zen Ambient Dashboard ready.');
+        })();
+    </script>
+
+</body>
 </html>
